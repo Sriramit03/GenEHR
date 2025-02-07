@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/Header";
 import FormField from "@/components/FormField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import { router } from "expo-router";
 import CustomAlertBox from "@/components/CustomAlertBox";
@@ -33,6 +33,17 @@ const HealthMetrics = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [filteredList, setFilteredList] = useState([]);
+  const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
+
+  useEffect(()=>{
+   const dateObj = new Date();
+   setDate(dateObj.toDateString());
+   const hr = dateObj.getHours() % 12 || 12;
+   const min = dateObj.getMinutes();
+   const ampm = hr>=12 ? "PM" : "AM";
+   setTime(`${hr}:${min < 10 ? "0" + min : min} ${ampm}`);
+  },[])
 
   // Toggle selection
   const toggleCheckbox = (item) => {
@@ -150,7 +161,14 @@ const HealthMetrics = () => {
             </View>
           </View>
         </Modal>
-
+        <View className="mx-[5%] flex flex-row justify-between items-center">
+          <Text className="text-xl font-iregular">
+            {date}
+          </Text>
+          <Text className="text-xl font-iregular">
+            {time}
+          </Text>
+        </View>
         <View className="flex items-center bg-white rounded-[10px] m-6 py-6">
           <FormField
             title={"Blood Pressure"}

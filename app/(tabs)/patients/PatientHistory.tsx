@@ -17,7 +17,7 @@ const PatientHistory = () => {
   };
 
   const ToMedicalReport = () => {
-    router.push("/(tabs)/history/MedicalReport");
+    router.push("/(tabs)/patients/MedicalReport");
   };
   const history = [{ date: "21.2.2024" }, { date: "22.3.2024" }];
   return (
@@ -47,7 +47,7 @@ const PatientHistory = () => {
           </View>
         </View>
         <View className="w-full items-center my-4">
-          <Button title={"Upload Prescription"} handlePress={()=> router.push("/(tabs)/history/CameraScreen")} containerStyles={"min-w-150"} titleStyles={"text-white"} />
+          <Button title={"Upload Prescription"} handlePress={()=> router.push("/(tabs)/patients/CameraScreen")} containerStyles={"min-w-150"} titleStyles={"text-white"} />
         </View>
         <View className="  m-4 rounded-xl border-2 border-borderColor">
           <View className="flex flex-row justify-around p-4 border-b border-borderColor bg-[#cde2ea] rounded-t-lg">

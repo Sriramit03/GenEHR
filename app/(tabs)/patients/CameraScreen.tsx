@@ -6,11 +6,13 @@ import { Text, TouchableOpacity, View, Image } from "react-native";
 import * as FileSystem from "expo-file-system";
 import { usePatientContext } from "@/context/PatientProvider";
 import { router } from "expo-router";
+import React from "react";
 
 export default function CameraScreen() {
   const { patient, setPatient } = usePatientContext();
   const [hasPermission, setHasPermission] = useState(false);
   const [savedUri, setSavedUri] = useState(null);
+  const [savedUri1, setSavedUri1] = useState(null);
   const cameraRef = useRef(null);
 
   useEffect(() => {
@@ -47,7 +49,8 @@ export default function CameraScreen() {
       console.log(savedUri);
       const photo = await cameraRef.current?.takePictureAsync();
       const uri = photo.uri;
-      setSavedUri(uri);
+      if (savedUri === null) setSavedUri(uri);
+      else setSavedUri1(uri);
     } catch (err) {
       console.log("Error Occurred while capturing photo");
     }
@@ -70,24 +73,43 @@ export default function CameraScreen() {
           </TouchableOpacity>
         </View>
       </CameraView>
-      <View className="absolute bottom-14 right-6">
-        <Button
-          title={"Upload"}
-          handlePress={async () => {
-            await setPatient({ ...patient, image: savedUri });
-            router.back();
-
-          }}
-          containerStyles={"min-w-[70]"}
-          titleStyles={"text-white"}
-        />
-      </View>
-      <View className="absolute bottom-10 left-6">
-        {savedUri && (
-          <Image
-            source={{ uri: savedUri }}
-            className="w-32 h-32 rounded-lg mb-2"
+      {(savedUri !== null || savedUri1 !== null) && (
+        <View className="absolute items-center justify-center w-full mt-4">
+          <Button
+            title={"Upload"}
+            handlePress={async () => {
+              await setPatient({ ...patient, image: savedUri });
+              router.back();
+            }}
+            containerStyles={"min-w-[170]"}
+            titleStyles={"text-white"}
           />
+        </View>
+      )}
+      <View className="absolute bottom-10 left-6 items-center">
+        {savedUri && (
+          <>
+            <Text className="text-xl text-white font-imedium my-2">
+              Image 1
+            </Text>
+            <Image
+              source={{ uri: savedUri }}
+              className="w-32 h-32 rounded-lg mb-2"
+            />
+          </>
+        )}
+      </View>
+      <View className="absolute bottom-10 right-6 items-center">
+        {savedUri1 && (
+          <>
+            <Text className="text-xl text-white font-imedium my-2">
+              Image 2
+            </Text>
+            <Image
+              source={{ uri: savedUri1 }}
+              className="w-32 h-32 rounded-lg mb-2"
+            />
+          </>
         )}
       </View>
     </View>

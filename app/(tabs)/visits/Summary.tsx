@@ -46,7 +46,7 @@ const Summary = () => {
             buttonName={"Next Patient"}
             buttonFunc={() => {
               setModalVisible(false);
-              router.push("/(tabs)/patients");
+              router.push("/(tabs)/visits");
             }}
           />
         </Modal>

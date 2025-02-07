@@ -54,30 +54,30 @@ const Tabslayout = () => {
           }}
         />
         <Tabs.Screen
-          name="patients"
+          name="visits"
           options={{
-            title: "Patients",
+            title: "Visits",
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 icon={icons.patients}
                 color={color}
-                name="Patients"
+                name="Visits"
                 focused={focused}
               />
             ),
           }}
         />
         <Tabs.Screen
-          name="history"
+          name="patients"
           options={{
-            title: "History",
+            title: "Patients",
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon
                 icon={icons.history}
                 color={color}
-                name="History"
+                name="Patients"
                 focused={focused}
               />
             ),

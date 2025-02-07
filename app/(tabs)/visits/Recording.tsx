@@ -193,7 +193,7 @@ const Recording = () => {
 const handleSubmit = async() =>{
   if(savedUri){
     await setPatient({... patient , audio:savedUri});
-    router.push("/(tabs)/patients/Transcription");
+    router.push("/(tabs)/visits/Transcription");
   }
 }
 

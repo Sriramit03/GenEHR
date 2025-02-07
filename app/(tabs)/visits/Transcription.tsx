@@ -10,7 +10,7 @@ import { router } from "expo-router";
 const Transcription = () => {
   const { patient } = usePatientContext();
   const handleToSummary = () =>{
-    router.push("/(tabs)/patients/Summary");
+    router.push("/(tabs)/visits/Summary");
   }
   const text = `dr_logesh (1.0 : 2.3) : [' வணக்கம் டாக்டர்']
 unknown (1.5 : 2.3) : [' வணக்கம் டாக்டர்']
