@@ -16,9 +16,9 @@ const PatientHistory = () => {
       "The patient reports joint pain, especially when bending the knee, though walking is unaffected. The doctor rules out swelling and prescribes medication for pain relief, along with a supplement for joint strength. The patient is advised to take the medication daily and return if the pain persists after a week. The consultation concludes with reassurance, ensuring the patient follows the prescribed treatment for recovery",
   };
 
-  const ToMedicalReport = () =>{
-    router.push("/MedicalReport");
-  }
+  const ToMedicalReport = () => {
+    router.push("/(tabs)/history/MedicalReport");
+  };
   const history = [{ date: "21.2.2024" }, { date: "22.3.2024" }];
   return (
     <SafeAreaView className="bg-bgColor h-full">
@@ -46,6 +46,9 @@ const PatientHistory = () => {
             <Text className="text-xl">{patient.place}</Text>
           </View>
         </View>
+        <View className="w-full items-center my-4">
+          <Button title={"Upload Prescription"} handlePress={()=> router.push("/(tabs)/history/CameraScreen")} containerStyles={"min-w-150"} titleStyles={"text-white"} />
+        </View>
         <View className="  m-4 rounded-xl border-2 border-borderColor">
           <View className="flex flex-row justify-around p-4 border-b border-borderColor bg-[#cde2ea] rounded-t-lg">
             <Text className="text-xl font-imedium ">Date</Text>
@@ -56,7 +59,9 @@ const PatientHistory = () => {
             keyExtractor={(item) => item.date}
             renderItem={({ item, index }) => (
               <View
-                className={` flex flex-row  justify-around  p-4 items-center ${index !== history.length - 1 && "border-b border-borderColor"} `}
+                className={` flex flex-row  justify-around  p-4 items-center ${
+                  index !== history.length - 1 && "border-b border-borderColor"
+                } `}
               >
                 <Text className="text-xl">{item.date}</Text>
                 <View className="items-center">

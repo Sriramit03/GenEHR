@@ -7,6 +7,8 @@ const HistoryLayout = () => {
     <Stack>
         <Stack.Screen name="index" options={{headerShown:false}} />
         <Stack.Screen name="PatientHistory" options={{headerShown:false}} />
+        <Stack.Screen name="CameraScreen" options={{headerShown:false}} />
+        <Stack.Screen name="MedicalReport" options={{ headerShown: false }} />
     </Stack>
   )
 }

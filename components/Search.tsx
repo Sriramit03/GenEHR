@@ -6,12 +6,12 @@ const Search = ({ value, handleChangeText, handleSearch }) => {
   return (
     <View className="items-center">
       <View
-        className={`w-[90%] h-12 px-4 border-2 rounded-3xl items-center flex flex-row ${
+        className={`w-[90%] h-14 px-4 border-2 rounded-[26] items-center flex flex-row ${
           isFocused ? "border-blue" : "border-grey"
         }`}
       >
         <TextInput
-          className="text-black flex-1 font-iregular"
+          className="text-black flex-1 font-iregular h-12"
           value={value}
           placeholder="Enter Mobile No"
           placeholderTextColor="text-grey"

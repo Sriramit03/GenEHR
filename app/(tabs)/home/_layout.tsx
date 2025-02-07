@@ -8,6 +8,7 @@ const Homelayout = () => {
     <Stack.Screen name="index" options={{headerShown:false,headerStyle:{backgroundColor:"#F7F8FC"}}}/>
     <Stack.Screen name="HealthMetrics" options={{headerShown:false}}/>
     <Stack.Screen name="OldPatients" options={{headerShown:false}}/>
+    <Stack.Screen name="DoctorDetail" options={{headerShown:false}}/>
     </Stack>
   )
 }

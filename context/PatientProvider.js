@@ -12,8 +12,10 @@ const PatientProvider = ({ children }) => {
     audio: "",
     summary: "",
     transcription: "",
+    image:""
   });
   const [audioLoc, setAudioLoc] = useState(null);
+
   return (
     <PatientContext.Provider value={{patient, setPatient}}>
       {children}

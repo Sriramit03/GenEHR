@@ -2,10 +2,11 @@ import {
   View,
   Text,
   ScrollView,
-  Image,
   Modal,
+  TextInput,
+  Image,
   TouchableOpacity,
-  StatusBar,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/Header";
@@ -13,8 +14,9 @@ import FormField from "@/components/FormField";
 import { useState } from "react";
 import Button from "@/components/Button";
 import { router } from "expo-router";
-import icons from "@/constants/icons";
 import CustomAlertBox from "@/components/CustomAlertBox";
+import icons from "@/constants/icons";
+import symptoms from "@/constants/ComplainsOf";
 
 const HealthMetrics = () => {
   const [formValues, setFormValues] = useState({
@@ -23,8 +25,43 @@ const HealthMetrics = () => {
     pr: "",
     temp: "",
     wg: "",
+    co: [],
   });
   const [modalVisible, setModalVisible] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isAddVisible, setAddVisible] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [filteredList, setFilteredList] = useState([]);
+
+  // Toggle selection
+  const toggleCheckbox = (item) => {
+    setSelectedItems((prev) =>
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+    );
+  };
+
+  // Filter list based on search
+  const handleSearch = (e) => {
+    setSearchText(e);
+    setFilteredList(
+      symptoms.filter((item) =>
+        item.toLowerCase().includes(searchText.toLowerCase())
+      )
+    );
+    if (e !== "" && filteredList.length == 0) {
+      setAddVisible(true);
+    }
+    if (e == "") {
+      setFilteredList([]);
+      setAddVisible(false);
+    }
+  };
+
+  const onCloseAndDone = () => {
+    setFormValues({ ...formValues, co: selectedItems });
+    setIsFocused(false);
+  };
 
   const submitMetrics = () => {
     setModalVisible(true);
@@ -33,6 +70,7 @@ const HealthMetrics = () => {
     setModalVisible(false);
     router.push("/(tabs)/home");
   };
+  const handleComplainsOf = () => {};
 
   return (
     <SafeAreaView className="bg-bgColor h-full">
@@ -51,6 +89,66 @@ const HealthMetrics = () => {
             buttonName={"New Patient"}
             buttonFunc={BackToHome}
           />
+        </Modal>
+        <Modal
+          visible={isFocused}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={onCloseAndDone}
+        >
+          <View className="bg-white h-[95%] m-4 p-5 mb-4">
+            <View className="mb-4">
+              <Text className="text-xl font-imedium border-b-2 mb-4 pb-4 border-grey">
+                C/O
+              </Text>
+              <View className="border-2 border-grey h-14  flex flex-row justify-center items-center px-4">
+                <TextInput
+                  value={searchText}
+                  placeholder="Add or Search"
+                  onChangeText={(e) => handleSearch(e)}
+                  className={"text-black flex-1 font-iregular h-14"}
+                />
+
+                {isAddVisible && (
+                  <TouchableOpacity>
+                    <Text className="text-xl font-imedium text-green-600">
+                      Add
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+            <FlatList
+              data={filteredList.length > 0 ? filteredList : symptoms}
+              keyExtractor={(item, index) => index}
+              className=""
+              renderItem={({ item, index }) => (
+                <TouchableOpacity
+                  onPress={() => toggleCheckbox(item)}
+                  className={`flex-row items-center mb-4 = `}
+                >
+                  <View
+                    className={`h-6 w-6 border-2 border-grey justify-center items-center mr-10`}
+                  >
+                    {selectedItems.includes(item) && (
+                      <Image source={icons.tick} className="w-7 h-7" />
+                    )}
+                  </View>
+                  <Text className="text-lg font-iregular">{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <View className="my-4 flex flex-row justify-between">
+              <TouchableOpacity onPress={() => setIsFocused(false)}>
+                <Text className="text-xl font-imedium text-red-600">Close</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onCloseAndDone}>
+                <Text className="text-xl font-imedium text-green-600">
+                  Done
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </Modal>
 
         <View className="flex items-center bg-white rounded-[10px] m-6 py-6">
@@ -89,6 +187,28 @@ const HealthMetrics = () => {
             handleChangeText={(e) => setFormValues({ ...formValues, wg: e })}
             otherStyles={"mb-6"}
           />
+
+          <TouchableOpacity className="w-[80%]" onPress={()=>setIsFocused(true)}>
+            <View className={`space-y-2`}>
+              <Text className="text-[18px] text-black font-imedium mb-2">
+                C/O
+              </Text>
+              <View
+                className={`   border-2 rounded-[5px] items-center flex flex-row ${
+                  isFocused ? "border-blue" : "border-grey"
+                }`}
+              >
+                <View className=" w-full flex flex-row justify-around items-center p-4">
+                  <Text className="w-[80%] text-black leading-relaxed">
+                    {formValues.co.join(", ")}
+                  </Text>
+                  <TouchableOpacity onPress={() => setIsFocused(true)}>
+                    <Image source={icons.plus} className="h-7 w-7" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
 
         <View className="w-full justify-center items-center">

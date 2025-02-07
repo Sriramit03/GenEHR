@@ -1,14 +1,3 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  SafeAreaView,
-  Image,
-  TouchableOpacity,
-  Linking,
-  Alert,
-  AppState,
-} from "react-native";
 import React, { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import icons from "@/constants/icons";
@@ -19,16 +8,28 @@ import AudioPlayer from "@/components/AudioPlayer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { usePatientContext } from "@/context/PatientProvider";
+import {
+  Alert,
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Image,
+  Text,
+} from "react-native";
+import FormField from "@/components/FormField";
 
-const Recording = () => {
-  const [recording, setRecording] = useState();
+const DoctorDetail = () => {
+  const [docName, setDocName] = useState("");
   const [timer, setTimer] = useState(0);
   const [savedUri, setSavedUri] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
-  const {patient,setPatient} = usePatientContext();
+  const { patient, setPatient } = usePatientContext();
+  const [recording, setRecording] = useState();
 
   const recordingOptions = {
     android: {
@@ -69,8 +70,7 @@ const Recording = () => {
       const savedPermission = await AsyncStorage.getItem("audioPermission");
       if (savedPermission === "granted") {
         setHasPermission(true);
-      }
-      else{
+      } else {
         requestPermission();
       }
     } catch (err) {
@@ -83,13 +83,13 @@ const Recording = () => {
     if (response.granted) {
       await AsyncStorage.setItem("audioPermission", "granted");
       setHasPermission(true);
-    }else if (response.canAskAgain) {
+    } else if (response.canAskAgain) {
       const requestResponse = await Audio.requestPermissionsAsync();
       setHasPermission(requestResponse.granted);
       if (requestResponse.granted) {
         await AsyncStorage.setItem("audioPermission", "granted");
       }
-    }else {
+    } else {
       Alert.alert(
         "Permission Required",
         "Audio recording permission is required. Please enable it in system settings.",
@@ -143,7 +143,7 @@ const Recording = () => {
       if (recording) {
         await recording.stopAndUnloadAsync();
         const uri = recording.getURI();
-        const newUri = FileSystem.documentDirectory + "audio/recording.wav";
+        const newUri = FileSystem.documentDirectory + "audio/DoctorRecording.wav";
         await FileSystem.makeDirectoryAsync(
           FileSystem.documentDirectory + "audio",
           { intermediates: true }
@@ -152,7 +152,6 @@ const Recording = () => {
           from: uri,
           to: newUri,
         });
-        console.log(newUri);
         setSavedUri(newUri);
         setRecording(null);
         setIsRecording(false);
@@ -190,62 +189,82 @@ const Recording = () => {
     }
   };
 
-const handleSubmit = async() =>{
-  if(savedUri){
-    await setPatient({... patient , audio:savedUri});
-    router.push("/(tabs)/patients/Transcription");
-  }
-}
-
   return (
-    <SafeAreaView className="flex-1 bg-bgColor h-full">
-      <Header pageName={"Recording"} />
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        className="flex-1 flex-grow"
-      >
-        <View className="flex-1 justify-between">
-          {/* Timer Display */}
-          <View className="items-center mt-5">
-            <Text className="font-iregular text-[40px]">
-              {formatTime(timer)}
-            </Text>
-          </View>
+    <SafeAreaView className="bg-bgColor h-full">
+      <Header pageName={"Doctor Details"} />
+      <View className="flex items-center">
+        <FormField
+          title={"Doctor's Name"}
+          value={docName}
+          placeholder={"Enter Doctor name:"}
+          handleChangeText={(e) => setDocName(e)}
+          otherStyles={undefined}
+        />
+      </View>
+      <View className="flex justify-center">
+        {/* Timer Display */}
+        <View className="items-center mt-5">
+          <Text className="font-iregular text-[40px]">{formatTime(timer)}</Text>
+        </View>
 
-          {/* Controls at the Bottom */}
-          <View className="items-center mb-8">
-            {/* Audio Player if Recording Completed */}
-            {isCompleted && <AudioPlayer uri={savedUri} />}
-            <View className="bg-white p-4 rounded-xl flex-row items-center justify-around gap-10">
-              {!isRecording ? (
-                <TouchableOpacity
-                  onPress={isPaused ? resumeRecording : startRecording}
-                >
-                  <Image
-                    source={icons.record}
-                    className="w-[60px] h-[60px]"
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity onPress={pauseRecording}>
-                  <Image
-                    source={icons.pause}
-                    className="w-[60px] h-[60px]"
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity onPress={stopRecording}>
-                <Image source={icons.save} className="w-[45px] h-[45px]" />
+        {/* Controls at the Bottom */}
+        <View className="items-center mb-8">
+          {/* Audio Player if Recording Completed */}
+
+          <View className="bg-white p-4 rounded-xl flex-row items-center justify-around gap-10">
+            {!isRecording ? (
+              <TouchableOpacity
+                onPress={isPaused ? resumeRecording : startRecording}
+              >
+                <Image
+                  source={icons.record}
+                  className="w-[60px] h-[60px]"
+                  resizeMode="contain"
+                />
               </TouchableOpacity>
-            </View>
-            <Button title={"Process the audio"} handlePress={handleSubmit} containerStyles={"min-w-[150] mt-6"} titleStyles={"text-white"} />
+            ) : (
+              <TouchableOpacity onPress={pauseRecording}>
+                <Image
+                  source={icons.pause}
+                  className="w-[60px] h-[60px]"
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={stopRecording}>
+              <Image source={icons.save} className="w-[45px] h-[45px]" />
+            </TouchableOpacity>
           </View>
+          {isCompleted && (
+            <>
+              <AudioPlayer uri={savedUri} />
+              <Button
+                title={"Submit"}
+                handlePress={undefined}
+                containerStyles={"min-w-[150] mt-6"}
+                titleStyles={"text-white"}
+              />
+            </>
+          )}
+        </View>
+      </View>
+      <ScrollView>
+        <View className="mx-[5%] items-center">
+          <Text className="text-xl">
+            "வணக்கம்! எப்படி இருக்கிறீர்கள்?" "எந்த பிரச்சனைக்கு
+            வந்திருக்கிறீர்கள்?" "உங்கள் வயது என்ன?" "எவ்வளவு நாட்களாக இந்த
+            பிரச்சனை உள்ளது?" "வயிற்று வலி இருக்கிறதா?" "காய்ச்சல், சளி, இருமல்
+            எதாவது உள்ளதா?" "உணவு சாப்பிடும் பழக்கம் எப்படி உள்ளது?" "எந்த
+            மருந்துகள் எடுத்துக் கொண்டிருக்கிறீர்கள்?" "உங்கள் ரத்த அழுத்தம்,
+            சர்க்கரை அளவு சரியாக இருக்கிறதா?" "தவறாமல் மருந்துகளை
+            எடுத்துக்கொள்ளுங்கள்." "நீங்கள் ஓய்வெடுத்துக் கொள்ளவும், தேவையெனில்
+            மீண்டும் பரிசோதனை செய்யலாம்." "நல்லது, நீங்கள் வாரம் கழித்து
+            மீண்டும் வரலாம்." "நன்றி!"
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default Recording;
+export default DoctorDetail;

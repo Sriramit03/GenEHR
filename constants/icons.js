@@ -22,4 +22,7 @@ export default {
   pause: require("../assets/icons/pause.png"),
   document: require("../assets/icons/document.png"),
   save:require("../assets/icons/save.png"),
+  plus:require("../assets/icons/plus.png"),
+  tick:require("../assets/icons/tick.png"),
+  camera:require("../assets/icons/camera.png")
 };

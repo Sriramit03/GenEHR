@@ -1,4 +1,10 @@
-import { View, Text, ScrollView, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/Header";
@@ -36,7 +42,9 @@ const History = () => {
               name={item.name}
               id={item.age}
               date={item.date}
-              handleFetch={() => router.push("/(tabs)/history/PatientHistory")} buttonName={"View"}            />
+              handleFetch={() => router.push("/(tabs)/history/PatientHistory")}
+              buttonName={"View"}
+            />
           )}
           ListEmptyComponent={
             <View className="flex justify-center items-center">
@@ -45,6 +53,7 @@ const History = () => {
           }
           scrollEnabled={false}
         />
+        <View className="mx-6 justify-center "></View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -5,7 +5,6 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
-  StatusBar,
 } from "react-native";
 import React, { useState } from "react";
 import Button from "@/components/Button";
@@ -23,12 +22,7 @@ const Home = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const submitPatient = () => {
-    if (
-      formValues.name != "" &&
-      formValues.age != "" &&
-      formValues.mobNo != "" &&
-      formValues.abhaNo != ""
-    ) {
+    if (formValues.name != "" && formValues.age != "") {
       console.log(JSON.stringify(formValues, null, 2));
       setIsLoading(true);
       setTimeout(() => {
@@ -41,7 +35,16 @@ const Home = () => {
   };
   return (
     <SafeAreaView className="bg-bgColor h-full">
-      <Text className="text-2xl font-ibold text-black mx-6 my-4">C_RIHT</Text>
+      <View className="flex flex-row justify-between mx-4 items-center">
+        <Text className="text-2xl font-ibold text-black mx-6 my-4">C_RIHT</Text>
+        <Button
+          title={"Doctor Details"}
+          handlePress={()=> router.push("/(tabs)/home/DoctorDetail")
+          }
+          containerStyles={"min-w-[120]"}
+          titleStyles={"text-white"}
+        />
+      </View>
       <ScrollView>
         <Modal
           visible={isLoading}
@@ -102,7 +105,6 @@ const Home = () => {
           />
         </View>
       </ScrollView>
-      
     </SafeAreaView>
   );
 };
