@@ -8,31 +8,42 @@ import PatientCardSearch from "@/components/PatientCardSearch";
 import PatientDetail from "@/components/PatientDetail";
 import Button from "@/components/Button";
 import { router } from "expo-router";
+import ip from "@/constants/IP";
+import { usePatientContext } from "@/context/PatientProvider";
 
 const OldPatients = () => {
+  const { patient, setPatient } = usePatientContext();
   const [searchValue, setSearchValue] = useState("");
+  const [patients, setPatients] = useState([]);
   const [isFetched, setIsFetched] = useState(false);
-  const [fetchedDetails, setFetchedDetails] = useState({
-    name: "",
-    age: "",
-    mobNo: "",
-    abhaNo: "",
-  });
+  const [fetchedDetails, setFetchedDetails] = useState({});
   const submitting = () => {
+    setPatient({
+      ...patient,
+      mobNo: fetchedDetails.PatientRegistration.MobileNo,
+    });
     router.push("/(tabs)/home/HealthMetrics");
   };
-  const searching = () => {
-    console.log(searchValue);
+  const searchPatients = async () => {
+    try {
+      setIsFetched(false);
+      const response = await fetch(`http://${ip}:8000/patient/${searchValue}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        setPatients([]);
+      }
+      const data = await response.json();
+      setPatients(data.patients);
+    } catch (error) {
+      console.error("Error fetching patient:", error.message);
+    }
   };
-  const fetching = () => {
-    setFetchedDetails({ name: "Sriram", age: "23", mobNo: "24", abhaNo: "27" });
-    setIsFetched(true);
-    console.log(JSON.stringify(fetchedDetails));
-  };
-  const patients = [
-    { id: "1", name: "John Doe", age: "45", date: "2024-01-15" },
-    { id: "2", name: "Sriram Ramasamy ", age: "33", date: "2023-12-10" },
-  ];
+ 
 
   return (
     <SafeAreaView className="bg-bgColor h-full">
@@ -43,23 +54,26 @@ const OldPatients = () => {
           <Search
             value={searchValue}
             handleChangeText={(e) => setSearchValue(e)}
-            handleSearch={searching}
+            handleSearch={searchPatients}
           />
         </View>
         <FlatList
           data={patients}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => index}
           renderItem={({ item }) => (
             <PatientCardSearch
-              name={item.name}
-              id={item.age}
-              date={item.date}
-              handleFetch={fetching}
+              name={item.Name}
+              id={item.Age}
+              date="11/02/2025"
+              handleFetch={() => {
+                setFetchedDetails(item);
+                setIsFetched(true);
+              }}
               buttonName={"Fetch"}
             />
           )}
           ListEmptyComponent={
-            <View className="flex justify-center items-center">
+            <View className="flex justify-center items-center mt-4">
               <Text className="font-ibold text-2xl ">No Patients Found</Text>
             </View>
           }

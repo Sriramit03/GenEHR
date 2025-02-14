@@ -17,14 +17,17 @@ import { router } from "expo-router";
 import CustomAlertBox from "@/components/CustomAlertBox";
 import icons from "@/constants/icons";
 import symptoms from "@/constants/ComplainsOf";
+import { usePatientContext } from "@/context/PatientProvider";
+import ip from "@/constants/IP";
 
 const HealthMetrics = () => {
+  const { patient, setPatient } = usePatientContext();
   const [formValues, setFormValues] = useState({
-    spo2: "",
+    spo2: 0,
     bp: "",
-    pr: "",
-    temp: "",
-    wg: "",
+    pr: 0,
+    temp: 0,
+    wg: 0,
     co: [],
   });
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,14 +39,15 @@ const HealthMetrics = () => {
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
 
-  useEffect(()=>{
-   const dateObj = new Date();
-   setDate(dateObj.toDateString());
-   const hr = dateObj.getHours() % 12 || 12;
-   const min = dateObj.getMinutes();
-   const ampm = hr>=12 ? "PM" : "AM";
-   setTime(`${hr}:${min < 10 ? "0" + min : min} ${ampm}`);
-  },[])
+  useEffect(() => {
+    const dateObj = new Date();
+    setDate(dateObj.toDateString());
+    const hr = dateObj.getHours() % 12 || 12;
+    const min = dateObj.getMinutes();
+    const ampm = hr >= 12 ? "PM" : "AM";
+    console.log(patient);
+    setTime(`${hr}:${min < 10 ? "0" + min : min} ${ampm}`);
+  }, []);
 
   // Toggle selection
   const toggleCheckbox = (item) => {
@@ -72,10 +76,57 @@ const HealthMetrics = () => {
   const onCloseAndDone = () => {
     setFormValues({ ...formValues, co: selectedItems });
     setIsFocused(false);
+    console.log(formValues.co);
   };
 
-  const submitMetrics = () => {
-    setModalVisible(true);
+  const addHealthMetrics = async () => {
+    console.log({
+      Name: patient.name,
+      MobileNo: patient.mobNo,
+      Date: "",
+      OxygenInBlood: formValues.spo2,
+      Weight: formValues.wg,
+      Temperature: formValues.temp,
+      BloodPressure: formValues.bp,
+      PulseRate: formValues.pr,
+      Complaints: formValues.co,
+    });
+    try {
+      const response = await fetch(`http://${ip}:8000/health-metrics/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          Name: patient.name,
+          MobileNo: patient.mobNo,
+          Date: "",
+          OxygenInBlood: formValues.spo2,
+          Weight: formValues.wg,
+          Temperature: formValues.temp,
+          BloodPressure: formValues.bp,
+          PulseRate: formValues.pr,
+          Complaints: formValues.co,
+          Transcription: "",
+          AudioRecord: "",
+          Summary: "",
+          HasAttended: false,
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data);
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to add health metrics");
+      }
+      setModalVisible(true);
+      console.log("Health Metrics Added Successfully:", data);
+    } catch (error) {
+      console.error(
+        "Error adding health metrics:",
+        JSON.stringify(error, null, 2)
+      );
+    }
   };
   const BackToHome = () => {
     setModalVisible(false);
@@ -162,12 +213,8 @@ const HealthMetrics = () => {
           </View>
         </Modal>
         <View className="mx-[5%] flex flex-row justify-between items-center">
-          <Text className="text-xl font-iregular">
-            {date}
-          </Text>
-          <Text className="text-xl font-iregular">
-            {time}
-          </Text>
+          <Text className="text-xl font-iregular">{date}</Text>
+          <Text className="text-xl font-iregular">{time}</Text>
         </View>
         <View className="flex items-center bg-white rounded-[10px] m-6 py-6">
           <FormField
@@ -206,7 +253,10 @@ const HealthMetrics = () => {
             otherStyles={"mb-6"}
           />
 
-          <TouchableOpacity className="w-[80%]" onPress={()=>setIsFocused(true)}>
+          <TouchableOpacity
+            className="w-[80%]"
+            onPress={() => setIsFocused(true)}
+          >
             <View className={`space-y-2`}>
               <Text className="text-[18px] text-black font-imedium mb-2">
                 C/O
@@ -232,7 +282,7 @@ const HealthMetrics = () => {
         <View className="w-full justify-center items-center">
           <Button
             title={"Next"}
-            handlePress={submitMetrics}
+            handlePress={addHealthMetrics}
             containerStyles={"min-w-[100]"}
             titleStyles={"text-white"}
           />

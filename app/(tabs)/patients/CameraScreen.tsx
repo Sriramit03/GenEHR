@@ -7,6 +7,7 @@ import * as FileSystem from "expo-file-system";
 import { usePatientContext } from "@/context/PatientProvider";
 import { router } from "expo-router";
 import React from "react";
+import ip from "@/constants/IP";
 
 export default function CameraScreen() {
   const { patient, setPatient } = usePatientContext();
@@ -56,6 +57,48 @@ export default function CameraScreen() {
     }
   };
 
+  /* Function Which Uploads Images to backend */
+
+  const uploadImages = async () => {
+    
+    router.back();
+    if (savedUri && savedUri1) {
+          await setPatient({ ...patient, image1: savedUri, image2: savedUri1 });
+          const formData = new FormData();
+          formData.append("file1", {
+            uri: savedUri, // First image URI
+            name: "image1.jpg", // First image name
+            type: "image/jpeg", // Adjust type based on your image format
+          });
+          
+          formData.append("file2", {
+            uri: savedUri1, // Second image URI
+            name: "image2.jpg", // Second image name
+            type: "image/jpeg",
+          });
+          formData.append("mobile_no", patient.mobNo);
+          formData.append("Name",patient.name);
+    
+          try {
+            const response = await fetch(`http://${ip}:8000/upload-image/`, {
+              method: "POST",
+              body: formData,
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            });
+            console.log("Request Sent")
+            const responseData = await response.json();
+            console.log(responseData);
+            if (response.ok) {
+              router.back();
+            }
+          } catch (error) {
+            console.error(`Backend Error: ${error}`);
+          }
+        }
+  };
+
   return (
     <View className="flex-1 bg-white">
       <CameraView
@@ -77,10 +120,7 @@ export default function CameraScreen() {
         <View className="absolute items-center justify-center w-full mt-4">
           <Button
             title={"Upload"}
-            handlePress={async () => {
-              await setPatient({ ...patient, image: savedUri });
-              router.back();
-            }}
+            handlePress={uploadImages}
             containerStyles={"min-w-[170]"}
             titleStyles={"text-white"}
           />

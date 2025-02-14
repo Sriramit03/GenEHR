@@ -14,5 +14,5 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "nativewind-env.d.ts"
-, "app/(tabs)/home/HealthMetrics.jsx", "context/PatientProvider.js"  ]
+, "app/(tabs)/home/HealthMetrics.jsx", "context/PatientProvider.jsx"  ]
 }

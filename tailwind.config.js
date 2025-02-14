@@ -12,6 +12,7 @@ module.exports = {
         bgColor:"#F0F8FF",
         ctransparent:"#000000",
         borderColor:"#a1c9d7",
+        orange:"#ffad82"
       },
       fontFamily:{
         ibold:["ibm-bold"],

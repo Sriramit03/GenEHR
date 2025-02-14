@@ -19,6 +19,7 @@ import AudioPlayer from "@/components/AudioPlayer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { usePatientContext } from "@/context/PatientProvider";
+import ip from "@/constants/IP";
 
 const Recording = () => {
   const [recording, setRecording] = useState();
@@ -28,27 +29,28 @@ const Recording = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
-  const {patient,setPatient} = usePatientContext();
+  const { patient, setPatient } = usePatientContext();
 
   const recordingOptions = {
     android: {
       extension: ".wav",
       outputFormat: Audio.RECORDING_OPTION_OUTPUT_FORMAT_LINEAR_PCM,
       audioEncoder: Audio.RECORDING_OPTION_AUDIO_ENCODER_PCM_16BIT,
-      sampleRate: 44100, // Sample rate for better quality (standard for high-quality audio)
-      numberOfChannels: 1, // Mono channel for better clarity, or 2 for stereo
+      sampleRate: 44100,
+      numberOfChannels: 1,
     },
     ios: {
       extension: ".caf",
       audioQuality: Audio.RECORDING_OPTION_AUDIO_QUALITY_HIGH,
       sampleRate: 44100,
-      numberOfChannels: 1, // Mono channel for better clarity
+      numberOfChannels: 1,
     },
   };
 
   useEffect(() => {
     try {
       checkPermission();
+      console.log(patient);
     } catch (err) {
       console.log(err);
     }
@@ -58,10 +60,10 @@ const Recording = () => {
     let interval;
     if (isRecording && !isPaused) {
       interval = setInterval(() => {
-        setTimer((prev) => prev + 100); // Increment by 100ms
-      }, 100); // Interval of 100ms for precision
+        setTimer((prev) => prev + 100);
+      }, 100);
     }
-    return () => clearInterval(interval); // Cleanup the interval
+    return () => clearInterval(interval);
   }, [isRecording, isPaused]);
 
   async function checkPermission() {
@@ -69,8 +71,7 @@ const Recording = () => {
       const savedPermission = await AsyncStorage.getItem("audioPermission");
       if (savedPermission === "granted") {
         setHasPermission(true);
-      }
-      else{
+      } else {
         requestPermission();
       }
     } catch (err) {
@@ -83,13 +84,13 @@ const Recording = () => {
     if (response.granted) {
       await AsyncStorage.setItem("audioPermission", "granted");
       setHasPermission(true);
-    }else if (response.canAskAgain) {
+    } else if (response.canAskAgain) {
       const requestResponse = await Audio.requestPermissionsAsync();
       setHasPermission(requestResponse.granted);
       if (requestResponse.granted) {
         await AsyncStorage.setItem("audioPermission", "granted");
       }
-    }else {
+    } else {
       Alert.alert(
         "Permission Required",
         "Audio recording permission is required. Please enable it in system settings.",
@@ -106,14 +107,13 @@ const Recording = () => {
     }
   }
 
-  // Format time to show minutes, seconds, and milliseconds
   function formatTime(ms) {
     const mins = Math.floor(ms / 60000);
     const secs = Math.floor((ms % 60000) / 1000);
     const millis = ms % 1000;
     return `${mins.toString().padStart(2, "0")}:${secs
       .toString()
-      .padStart(2, "0")}.${millis.toString().padStart(3, "0")}`; // Show milliseconds
+      .padStart(2, "0")}.${millis.toString().padStart(3, "0")}`;
   }
 
   const startRecording = async () => {
@@ -152,7 +152,6 @@ const Recording = () => {
           from: uri,
           to: newUri,
         });
-        console.log(newUri);
         setSavedUri(newUri);
         setRecording(null);
         setIsRecording(false);
@@ -190,12 +189,44 @@ const Recording = () => {
     }
   };
 
-const handleSubmit = async() =>{
-  if(savedUri){
-    await setPatient({... patient , audio:savedUri});
-    router.push("/(tabs)/visits/Transcription");
-  }
-}
+  const handleSubmit = async () => {
+    console.log("In submit");
+    if (savedUri) {
+      await setPatient({ ...patient, audio: savedUri });
+      const formData = new FormData();
+      formData.append("file", {
+        uri: savedUri,
+        name: "recording.wav",
+        type: "audio/wav",
+      });
+      formData.append("mobile_no", patient.mobNo);
+      formData.append("Name", patient.name);
+
+      try {
+        const response = await fetch(`http://${ip}:8000/upload-audio/`, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        const responseData = await response.json();
+        if (response.ok) {
+          setPatient((prevPatient) => ({
+            ...prevPatient,
+            transcription: responseData.transcription,
+            summary: responseData.summary,
+          }));
+          router.push("/(tabs)/visits/Transcription");
+        } else {
+          throw new Error("Failed to send data");
+        }
+        console.log(response);
+      } catch (error) {
+        console.error(`Backend Error: ${error}`);
+      }
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-bgColor h-full">
@@ -240,7 +271,14 @@ const handleSubmit = async() =>{
                 <Image source={icons.save} className="w-[45px] h-[45px]" />
               </TouchableOpacity>
             </View>
-            <Button title={"Process the audio"} handlePress={handleSubmit} containerStyles={"min-w-[150] mt-6"} titleStyles={"text-white"} />
+            {isCompleted && (
+              <Button
+                title={"Process the audio"}
+                handlePress={handleSubmit}
+                containerStyles={"min-w-[150] mt-6"}
+                titleStyles={"text-white"}
+              />
+            )}
           </View>
         </View>
       </ScrollView>

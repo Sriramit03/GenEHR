@@ -5,16 +5,21 @@ export const usePatientContext = () => useContext(PatientContext);
 const PatientProvider = ({ children }) => {
   const [patient, setPatient] = useState({
     name: "",
+    id:"",
     age: "",
     city: "",
+    date:"",
     mobNo: "",
     abhaNo: "",
-    audio: "",
+    gender:"",
+    co:[],
+    audio: null,
     summary: "",
     transcription: "",
-    image:""
+    image1:"",
+    image2:""
   });
-  const [audioLoc, setAudioLoc] = useState(null);
+
 
   return (
     <PatientContext.Provider value={{patient, setPatient}}>
