@@ -1,4 +1,3 @@
-import { View, Text } from 'react-native'
 import React from 'react'
 import { Stack } from 'expo-router'
 
@@ -9,6 +8,7 @@ const Homelayout = () => {
     <Stack.Screen name="HealthMetrics" options={{headerShown:false}}/>
     <Stack.Screen name="OldPatients" options={{headerShown:false}}/>
     <Stack.Screen name="DoctorDetail" options={{headerShown:false}}/>
+    <Stack.Screen name="DoctorRecording" options={{headerShown:false}}/>
     </Stack>
   )
 }

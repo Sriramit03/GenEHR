@@ -1,15 +1,3 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  SafeAreaView,
-  Image,
-  TouchableOpacity,
-  Linking,
-  Alert,
-  Modal,
-  ActivityIndicator,
-} from "react-native";
 import React, { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import icons from "@/constants/icons";
@@ -18,43 +6,38 @@ import Button from "@/components/Button";
 import * as FileSystem from "expo-file-system";
 import AudioPlayer from "@/components/AudioPlayer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { router } from "expo-router";
-import { usePatientContext } from "@/context/PatientProvider";
-/* import ip from "@/constants/IP"; */
-import { useIPContext } from "@/context/IPProvider";
 
-const Recording = () => {
-  const {ip, setIP} = useIPContext();
-  const [recording, setRecording] = useState();
+const DoctorRecording = () => {
   const [timer, setTimer] = useState(0);
   const [savedUri, setSavedUri] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { patient, setPatient } = usePatientContext();
+  const [recording, setRecording] = useState();
 
   const recordingOptions = {
     android: {
       extension: ".wav",
       outputFormat: Audio.RECORDING_OPTION_OUTPUT_FORMAT_LINEAR_PCM,
       audioEncoder: Audio.RECORDING_OPTION_AUDIO_ENCODER_PCM_16BIT,
-      sampleRate: 44100,
-      numberOfChannels: 1,
+      sampleRate: 44100, // Sample rate for better quality (standard for high-quality audio)
+      numberOfChannels: 1, // Mono channel for better clarity, or 2 for stereo
     },
     ios: {
       extension: ".caf",
       audioQuality: Audio.RECORDING_OPTION_AUDIO_QUALITY_HIGH,
       sampleRate: 44100,
-      numberOfChannels: 1,
+      numberOfChannels: 1, // Mono channel for better clarity
     },
   };
 
   useEffect(() => {
     try {
       checkPermission();
-      console.log(patient);
     } catch (err) {
       console.log(err);
     }
@@ -64,10 +47,10 @@ const Recording = () => {
     let interval;
     if (isRecording && !isPaused) {
       interval = setInterval(() => {
-        setTimer((prev) => prev + 100);
-      }, 100);
+        setTimer((prev) => prev + 100); // Increment by 100ms
+      }, 100); // Interval of 100ms for precision
     }
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // Cleanup the interval
   }, [isRecording, isPaused]);
 
   async function checkPermission() {
@@ -111,13 +94,14 @@ const Recording = () => {
     }
   }
 
+  // Format time to show minutes, seconds, and milliseconds
   function formatTime(ms) {
     const mins = Math.floor(ms / 60000);
     const secs = Math.floor((ms % 60000) / 1000);
     const millis = ms % 1000;
     return `${mins.toString().padStart(2, "0")}:${secs
       .toString()
-      .padStart(2, "0")}.${millis.toString().padStart(3, "0")}`;
+      .padStart(2, "0")}.${millis.toString().padStart(3, "0")}`; // Show milliseconds
   }
 
   const startRecording = async () => {
@@ -147,7 +131,8 @@ const Recording = () => {
       if (recording) {
         await recording.stopAndUnloadAsync();
         const uri = recording.getURI();
-        const newUri = FileSystem.documentDirectory + "audio/recording.wav";
+        const newUri =
+          FileSystem.documentDirectory + "audio/DoctorRecording.wav";
         await FileSystem.makeDirectoryAsync(
           FileSystem.documentDirectory + "audio",
           { intermediates: true }
@@ -192,72 +177,13 @@ const Recording = () => {
       console.error("Failed to resume recording", err);
     }
   };
-
-  const handleSubmit = async () => {
-    if (savedUri) {
-      setIsLoading(true);
-      await setPatient({ ...patient, audio: savedUri });
-      const formData = new FormData();
-      formData.append("file", {
-        uri: savedUri,
-        name: "recording.wav",
-        type: "audio/wav",
-      });
-      formData.append("mobile_no", patient.mobNo);
-      formData.append("Name", patient.name);
-
-      try {
-        console.log(isLoading);
-        const response = await fetch(`http://${ip}:8000/upload-audio/`, {
-          method: "POST",
-          body: formData,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        const responseData = await response.json();
-        if (response.ok) {
-          setPatient((prevPatient) => ({
-            ...prevPatient,
-            transcription: responseData.transcription,
-            summary: responseData.summary,
-          }));
-          router.push("/(tabs)/visits/Transcription");
-        } else {
-          throw new Error("Failed to send data");
-        }
-      } catch (error) {
-        console.error(`Backend Error: ${error}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
   return (
-    <SafeAreaView className="flex-1 bg-bgColor h-full">
-      <Header pageName={"Recording"} />
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        className="flex-1 flex-grow"
-      >
-        <Modal
-          visible={isLoading}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setIsLoading(false)}
-        >
-          <View className="flex justify-center items-center h-full absolute w-full bg-ctransparent/50 ">
-            <ActivityIndicator
-              animating={isLoading}
-              color="#0D2438"
-              size="large"
-              className=" "
-            />
-          </View>
-        </Modal>
-        <View className="flex-1 justify-between">
+    <SafeAreaView className="h-full bg-bgColor">
+      <Header pageName={"Doctor Audio Recording"} />
+      <ScrollView>
+        <View className="flex justify-center">
           {/* Timer Display */}
-          <View className="items-center mt-5">
+          <View className="items-center my-5">
             <Text className="font-iregular text-[40px]">
               {formatTime(timer)}
             </Text>
@@ -266,7 +192,7 @@ const Recording = () => {
           {/* Controls at the Bottom */}
           <View className="items-center mb-8">
             {/* Audio Player if Recording Completed */}
-            {isCompleted && <AudioPlayer uri={savedUri} />}
+
             <View className="bg-white p-4 rounded-xl flex-row items-center justify-around gap-10">
               {!isRecording ? (
                 <TouchableOpacity
@@ -292,18 +218,35 @@ const Recording = () => {
               </TouchableOpacity>
             </View>
             {isCompleted && (
-              <Button
-                title={"Process the audio"}
-                handlePress={handleSubmit}
-                containerStyles={"min-w-[150] mt-6"}
-                titleStyles={"text-white"}
-              />
+              <>
+                <AudioPlayer uri={savedUri} />
+                <Button
+                  title={"Submit"}
+                  handlePress={() => router.push("/(tabs)/home")}
+                  containerStyles={"min-w-[150] mt-6"}
+                  titleStyles={"text-white"}
+                />
+              </>
             )}
           </View>
+        </View>
+
+        <View className="mx-[5%] items-center">
+          <Text className="text-xl mb-4">
+            "வணக்கம்! எப்படி இருக்கிறீர்கள்?" "எந்த பிரச்சனைக்கு
+            வந்திருக்கிறீர்கள்?" "உங்கள் வயது என்ன?" "எவ்வளவு நாட்களாக இந்த
+            பிரச்சனை உள்ளது?" "வயிற்று வலி இருக்கிறதா?" "காய்ச்சல், சளி, இருமல்
+            எதாவது உள்ளதா?" "உணவு சாப்பிடும் பழக்கம் எப்படி உள்ளது?" "எந்த
+            மருந்துகள் எடுத்துக் கொண்டிருக்கிறீர்கள்?" "உங்கள் ரத்த அழுத்தம்,
+            சர்க்கரை அளவு சரியாக இருக்கிறதா?" "தவறாமல் மருந்துகளை
+            எடுத்துக்கொள்ளுங்கள்." "நீங்கள் ஓய்வெடுத்துக் கொள்ளவும், தேவையெனில்
+            மீண்டும் பரிசோதனை செய்யலாம்." "நல்லது, நீங்கள் வாரம் கழித்து
+            மீண்டும் வரலாம்." "நன்றி!"
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default Recording;
+export default DoctorRecording;

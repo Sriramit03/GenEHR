@@ -10,9 +10,11 @@ import Button from "@/components/Button";
 import { router } from "expo-router";
 import ip from "@/constants/IP";
 import { usePatientContext } from "@/context/PatientProvider";
+import { useIPContext } from "@/context/IPProvider";
 
 const OldPatients = () => {
   const { patient, setPatient } = usePatientContext();
+  const {ip, setIP} = useIPContext();
   const [searchValue, setSearchValue] = useState("");
   const [patients, setPatients] = useState([]);
   const [isFetched, setIsFetched] = useState(false);
@@ -20,7 +22,7 @@ const OldPatients = () => {
   const submitting = () => {
     setPatient({
       ...patient,
-      mobNo: fetchedDetails.PatientRegistration.MobileNo,
+      mobNo: fetchedDetails.MobileNo,
     });
     router.push("/(tabs)/home/HealthMetrics");
   };
@@ -38,6 +40,7 @@ const OldPatients = () => {
         setPatients([]);
       }
       const data = await response.json();
+      console.log(data.patients);
       setPatients(data.patients);
     } catch (error) {
       console.error("Error fetching patient:", error.message);
@@ -67,10 +70,10 @@ const OldPatients = () => {
               date="11/02/2025"
               handleFetch={() => {
                 setFetchedDetails(item);
+                console.log(fetchedDetails);
                 setIsFetched(true);
-              }}
-              buttonName={"Fetch"}
-            />
+              } }
+              buttonName={"Fetch"} mobNo={item.MobileNo}            />
           )}
           ListEmptyComponent={
             <View className="flex justify-center items-center mt-4">

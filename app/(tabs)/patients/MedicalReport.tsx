@@ -5,11 +5,13 @@ import Header from "@/components/Header";
 import { usePatientContext } from "@/context/PatientProvider";
 import AudioPlayer from "@/components/AudioPlayer";
 import { router } from "expo-router";
-import ip from "@/constants/IP";
+/* import ip from "@/constants/IP"; */
 import * as FileSystem from "expo-file-system";
+import { useIPContext } from "@/context/IPProvider";
 
 const MedicalReport = () => {
   const { patient, setPatient } = usePatientContext();
+  const {ip, setIP} = useIPContext();
   const [audioUri, setaudioUri] = useState(null);
   const [Image1Uri, setImage1Uri] = useState("");
   const [Image2Uri, setImage2Uri] = useState("");

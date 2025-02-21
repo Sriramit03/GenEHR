@@ -10,11 +10,13 @@ import Header from "@/components/Header";
 import Search from "@/components/Search";
 import PatientCardSearch from "@/components/PatientCardSearch";
 import { router } from "expo-router";
-import ip from "@/constants/IP";
+/* import ip from "@/constants/IP"; */
 import { usePatientContext } from "@/context/PatientProvider";
+import { useIPContext } from "@/context/IPProvider";
 
 const History = () => {
   const {patient,setPatient} = usePatientContext();
+  const {ip, setIP} = useIPContext();
   const [searchValue, setSearchValue] = useState("");
   const [patients, setPatients] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);

@@ -4,10 +4,12 @@ import Header from "@/components/Header";
 import Button from "@/components/Button";
 import { router } from "expo-router";
 import { usePatientContext } from "@/context/PatientProvider";
-import ip from "@/constants/IP"
+/* import ip from "@/constants/IP" */
+import { useIPContext } from "@/context/IPProvider";
 
 const PatientHistory = () => {
   const { patient, setPatient } = usePatientContext();
+  const {ip, setIP} = useIPContext();
   const [date, setDate] = useState([]);
 
   useEffect(()=>{

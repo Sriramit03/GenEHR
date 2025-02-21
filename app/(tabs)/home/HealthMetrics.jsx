@@ -18,10 +18,12 @@ import CustomAlertBox from "@/components/CustomAlertBox";
 import icons from "@/constants/icons";
 import symptoms from "@/constants/ComplainsOf";
 import { usePatientContext } from "@/context/PatientProvider";
-import ip from "@/constants/IP";
+import { useIPContext } from "@/context/IPProvider";
+/* import ip from "@/constants/IP"; */
 
 const HealthMetrics = () => {
   const { patient, setPatient } = usePatientContext();
+  const {ip, setIp} = useIPContext();
   const [formValues, setFormValues] = useState({
     spo2: 0,
     bp: "",

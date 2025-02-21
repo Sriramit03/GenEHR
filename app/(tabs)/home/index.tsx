@@ -8,15 +8,17 @@ import {
   Touchable,
   TouchableOpacity,
 } from "react-native";
-import React, { useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import Button from "@/components/Button";
 import ToggleButton from "@/components/ToggleButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FormField from "@/components/FormField";
 import { router } from "expo-router";
-import ip from "@/constants/IP";
+/* import ip from "@/constants/IP"; */
 import { usePatientContext } from "@/context/PatientProvider";
 import CustomAlertBox from "@/components/CustomAlertBox";
+import { useIPContext } from "@/context/IPProvider";
+
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -35,6 +37,7 @@ const reducer = (state, action) => {
 };
 
 const Home = () => {
+  const {ip, setIP} = useIPContext();
   const { patient, setPatient } = usePatientContext();
   const [state, dispatch] = useReducer(reducer, { gender: "" });
   const [formValues, setFormValues] = useState({
@@ -49,9 +52,11 @@ const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+
   const registerPatient = async () => {
     if (formValues.name != "" && formValues.age !== 0 && state.gender !== "") {
       try {
+        setIsLoading(true);
         const response = await fetch(`http://${ip}:8000/register/`, {
           method: "POST",
           headers: {
@@ -92,6 +97,9 @@ const Home = () => {
         }
       } catch (error) {
         console.error("Error registering patient:", error.message);
+      }
+      finally{
+        setIsLoading(false);
       }
     } else {
       Alert.alert("Error", "Please fill in all fields");

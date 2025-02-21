@@ -6,12 +6,14 @@ import AudioPlayer from "@/components/AudioPlayer";
 import Header from "@/components/Header";
 import icons from "@/constants/icons";
 import { router } from "expo-router";
+import { useIPContext } from "@/context/IPProvider";
 
 const Transcription = () => {
+  const { ip, setIP } = useIPContext();
   const { patient } = usePatientContext();
-  const handleToSummary = () =>{
+  const handleToSummary = () => {
     router.push("/(tabs)/visits/Summary");
-  }
+  };
 
   return (
     <SafeAreaView className="h-full flex-1 bg-bgColor">
@@ -19,10 +21,19 @@ const Transcription = () => {
       <ScrollView className="flex-1 ">
         {patient.audio && <AudioPlayer uri={patient.audio} />}
         <View className="bg-white p-4 mx-4 rounded-xl mb-8 ">
-          <Text className="text-xl">{patient.transcription}</Text>
+          {patient.transcription ? (
+            <Text className="text-xl">{patient.transcription}</Text>
+          ) : (
+            <Text className="text-xl font-imedium">
+              No transcription available
+            </Text>
+          )}
         </View>
       </ScrollView>
-      <TouchableOpacity className="absolute bottom-8 right-6 bg-blue p-4 rounded-[30] items-center shadow-lg" onPress={handleToSummary}>
+      <TouchableOpacity
+        className="absolute bottom-8 right-6 bg-blue p-4 rounded-[30] items-center shadow-lg"
+        onPress={handleToSummary}
+      >
         <Image source={icons.document} className="w-10 h-10" />
       </TouchableOpacity>
     </SafeAreaView>

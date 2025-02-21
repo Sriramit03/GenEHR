@@ -1,17 +1,27 @@
-import { View, ScrollView, Text, FlatList, RefreshControl } from "react-native";
+import {
+  View,
+  ScrollView,
+  Text,
+  FlatList,
+  RefreshControl,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/Header";
 import PatientCardRegistered from "@/components/PatientCardRegistered";
 import { router } from "expo-router";
-import ip from "@/constants/IP";
 import { usePatientContext } from "@/context/PatientProvider";
+import { useIPContext } from "@/context/IPProvider";
 
 const Patients = () => {
   const { patient, setPatient } = usePatientContext();
+  const { ip, setIP } = useIPContext();
   const [date, setDate] = useState({ day: "", nday: 0, mon: "" });
   const [patients, setPatients] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const dateObj = new Date();
@@ -23,26 +33,29 @@ const Patients = () => {
     fetchPatients();
   }, []);
 
-  // Function to fetch patients using fetch()
+  // Function to fetch patients using axios with https agent
   const fetchPatients = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch(`http://${ip}:8000/registeredpatients/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch patients");
+      console.log(response);
+      if (response.status == 200) {
+        const data = await response.json();
+        console.log(data);
+        setPatients(data.patients);
+        console.log(data.patients);
       }
-      const data = await response.json();
-      setPatients(data.patients); // Update state with fetched data
-      console.log(data.patients);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching patients:", error.message);
     } finally {
       // Hide loading indicator
+      setIsLoading(false);
     }
   };
 
@@ -58,21 +71,56 @@ const Patients = () => {
     router.push("/(tabs)/visits/Recording");
   };
 
-  // functionwhich refresh and fetch registered patients
+  // function which refreshes and fetches registered patients
   const onRefresh = async () => {
     setIsRefreshing(true);
     await fetchPatients();
     setIsRefreshing(false);
   };
+
+  /* const cancelPatient = async (mobNo,name) => {
+    try {
+      console.log(mobNo,name);
+      setIsLoading(true);
+      const response = await fetch(`http://${ip}:8000/CancelPatient/${mobNo}/${name}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      if (response.status == 200) {
+        console.log("Patient Cancelled successfully:", data);
+        fetchPatients();
+      }
+      setIsLoading(false);
+    } catch (error) {}
+  }; */
+
   return (
     <SafeAreaView className="bg-bgColor h-full">
       <Header pageName={"Registered Patients"} />
-
+      <Modal
+        visible={isLoading}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsLoading(false)}
+      >
+        <View className="flex justify-center items-center h-full absolute w-full bg-ctransparent/50 ">
+          <ActivityIndicator
+            animating={isLoading}
+            color="#0D2438"
+            size="large"
+            className=" "
+          />
+        </View>
+      </Modal>
       <FlatList
         data={patients}
         keyExtractor={(item, index) => index}
         renderItem={({ item }) => (
-          <PatientCardRegistered patient={item} addRecording={GoToRecording} />
+          <PatientCardRegistered patient={item} addRecording={GoToRecording} cancel={undefined} />
         )}
         ListEmptyComponent={
           <View className="flex justify-center items-center mt-4">
@@ -80,21 +128,23 @@ const Patients = () => {
           </View>
         }
         ListHeaderComponent={
-          <View className=" flex-1 flex-row justify-between items-center m-4">
-            <View>
-              <Text className="font-iregular text-lg pb-1">Hello,</Text>
-              <Text className="font-imedium text-xl text-blue">
-                Dr. Ramanan
-              </Text>
-            </View>
-            <View className="flex flex-row items-center gap-2">
-              <Text className="font-iregular text-[48px]">{date.nday}</Text>
+          <>
+            <View className=" flex-1 flex-row justify-between items-center m-4">
               <View>
-                <Text className="font-iregular text-lg ">{date.day}</Text>
-                <Text className="font-iregular text-lg ">{date.mon}</Text>
+                <Text className="font-iregular text-lg pb-1">Hello,</Text>
+                <Text className="font-imedium text-xl text-blue">
+                  Dr. Ramanan
+                </Text>
+              </View>
+              <View className="flex flex-row items-center gap-2">
+                <Text className="font-iregular text-[48px]">{date.nday}</Text>
+                <View>
+                  <Text className="font-iregular text-lg ">{date.day}</Text>
+                  <Text className="font-iregular text-lg ">{date.mon}</Text>
+                </View>
               </View>
             </View>
-          </View>
+          </>
         }
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />

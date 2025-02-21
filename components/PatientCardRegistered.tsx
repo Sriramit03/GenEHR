@@ -3,7 +3,7 @@ import React from "react";
 import Button from "./Button";
 import icons from "@/constants/icons";
 
-const PatientCardRegistered = ({ patient, addRecording }) => {
+const PatientCardRegistered = ({ patient, addRecording, cancel }) => {
   return (
     <View className="flex flex-row justify-around items-center  bg-white p-4 rounded-[10] mx-4 mb-4 ">
       <Text className="font-iregular text-xl w-[80] ">{patient.PatientID}</Text>
@@ -15,7 +15,7 @@ const PatientCardRegistered = ({ patient, addRecording }) => {
           resizeMode={"contain"}
         />}
       </TouchableOpacity>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={()=> cancel(patient.MobileNo,patient.Name)}>
        { <Image
           source={icons.reject}
           className="w-12 h-12"

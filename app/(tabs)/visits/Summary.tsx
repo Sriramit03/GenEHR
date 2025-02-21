@@ -7,11 +7,13 @@ import AudioPlayer from "@/components/AudioPlayer";
 import Button from "@/components/Button";
 import { router } from "expo-router";
 import CustomAlertBox from "@/components/CustomAlertBox";
+import { useIPContext } from "@/context/IPProvider";
 
 const Summary = () => {
+  const { ip, setIP } = useIPContext();
   const { patient } = usePatientContext();
   const [modalVisible, setModalVisible] = useState(false);
- 
+
   const handleSave = () => {
     setModalVisible(true);
   };
@@ -61,7 +63,7 @@ const Summary = () => {
         {patient.audio && <AudioPlayer uri={patient.audio} />}
         <Text className="text-xl font-imedium ml-4 my-6">C/O</Text>
         <View className="justify-center p-4 mx-4 rounded-xl bg-white items-center">
-         {/*  <Text className="text-xl font-iregular mb-4">
+          {/*  <Text className="text-xl font-iregular mb-4">
             {patient.co.join(", ")}
           </Text> */}
         </View>
@@ -86,7 +88,11 @@ const Summary = () => {
 
         <Text className="text-xl font-imedium ml-4 mb-6">Summary</Text>
         <View className="bg-white p-4 mx-4 rounded-xl ">
-          <Text className="text-xl">{patient.summary}</Text>
+          {patient.summary ? (
+            <Text className="text-xl">{patient.summary}</Text>
+          ) : (
+            <Text className="text-xl font-imedium">No Summary available</Text>
+          )}
         </View>
         <View className="items-center my-8">
           <Button
